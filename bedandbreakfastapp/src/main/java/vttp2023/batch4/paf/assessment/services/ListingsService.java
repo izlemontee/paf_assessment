@@ -80,7 +80,7 @@ public class ListingsService {
 				bookingRepo.newUser(user);
 				}
 				catch(SQLAddUserUnsuccessfulException ex){
-
+					throw new SQLAddUserUnsuccessfulException();
 				}
 			}
 			bookingRepo.newBookings(booking);
