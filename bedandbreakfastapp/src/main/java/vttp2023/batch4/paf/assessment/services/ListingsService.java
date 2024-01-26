@@ -5,10 +5,16 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import vttp2023.batch4.paf.Exceptions.SQLAddBookingUnsuccessfulException;
+import vttp2023.batch4.paf.Exceptions.SQLAddUserUnsuccessfulException;
+import vttp2023.batch4.paf.Exceptions.SQLUnsuccessfulException;
 import vttp2023.batch4.paf.assessment.models.Accommodation;
 import vttp2023.batch4.paf.assessment.models.AccommodationSummary;
 import vttp2023.batch4.paf.assessment.models.Bookings;
+import vttp2023.batch4.paf.assessment.models.User;
+import vttp2023.batch4.paf.assessment.repositories.BookingsRepository;
 import vttp2023.batch4.paf.assessment.repositories.ListingsRepository;
 
 @Service
@@ -18,6 +24,9 @@ public class ListingsService {
 
 	@Autowired
 	private ListingsRepository listingsRepo;
+
+	@Autowired
+	private BookingsRepository bookingRepo;
 
 	@Autowired
 	private ForexService forexSvc;
@@ -56,7 +65,31 @@ public class ListingsService {
 	// TODO: Task 6 
 	// IMPORTANT: DO NOT MODIFY THE SIGNATURE OF THIS METHOD.
 	// You may only add annotations and throw exceptions to this method
+	@Transactional
 	public void createBooking(Bookings booking) {
+		String email = booking.getEmail();
+		System.out.println("email: "+email);
+		String name = booking.getName();
+		String bookingId = booking.getBookingId();
+		int duration = booking.getDuration();
+		String listingId = booking.getListingId();
+		try{
+			if((bookingRepo.userExists(email).isEmpty())){
+				try{
+				User user = new User(email, name);
+				bookingRepo.newUser(user);
+				}
+				catch(SQLAddUserUnsuccessfulException ex){
+
+				}
+			}
+			bookingRepo.newBookings(booking);
+		}
+		catch(SQLAddBookingUnsuccessfulException bookingEx){
+			System.out.println("SQLUnsuccessfulException");
+			throw new SQLAddBookingUnsuccessfulException();
+		}
+
 	}
 
 }
