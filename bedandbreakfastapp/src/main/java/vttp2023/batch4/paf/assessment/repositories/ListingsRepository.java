@@ -1,5 +1,6 @@
 package vttp2023.batch4.paf.assessment.repositories;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,15 +23,22 @@ public class ListingsRepository {
 	@Autowired
 	private MongoTemplate template;
 
-	/*
-	 * Write the native MongoDB query that you will be using for this method
-	 * inside this comment block
-	 * eg. db.bffs.find({ name: 'fred }) 
-	 *
-	 *
-	 */
+	// db.listings.distinct("address.suburb",
+	// {
+	// 	"address.suburb":{$nin :["",null]},
+	// 	"address.country":{$regex:"Australia",$options:"i"}
+	// }
+	// )
 	public List<String> getSuburbs(String country) {
-		return null;
+		List<String> nin = new ArrayList<>();
+		nin.add("");
+		nin.add(null);
+
+		Query query = Query.query(Criteria.where("address.country").regex(country,"i")
+									.and("address.suburb").nin(nin));
+		List<String> result = template.findDistinct(query,"address.suburb","listings",Document.class,String.class);
+
+		return result;
 	}
 
 	/*
