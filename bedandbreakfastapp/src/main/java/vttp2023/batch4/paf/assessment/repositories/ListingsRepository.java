@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -23,10 +25,12 @@ public class ListingsRepository {
 	@Autowired
 	private MongoTemplate template;
 
+	private final String COLLECTION = "listings";
+
 	// db.listings.distinct("address.suburb",
 	// {
 	// 	"address.suburb":{$nin :["",null]},
-	// 	"address.country":{$regex:"Australia",$options:"i"}
+	// 	"address.country":{$regex:<country>,$options:"i"}
 	// }
 	// )
 	public List<String> getSuburbs(String country) {
@@ -41,15 +45,46 @@ public class ListingsRepository {
 		return result;
 	}
 
-	/*
-	 * Write the native MongoDB query that you will be using for this method
-	 * inside this comment block
-	 * eg. db.bffs.find({ name: 'fred }) 
-	 *
-	 *
-	 */
+		// db.listings.find(
+		// 	{
+		// 		"address.suburb":{$regex:"<suburb>",$options:"i"},
+		// 		accommodates:{$lte:<persons>},
+		// 		"min_nights":{$lte:<duration>},
+		// 		price:{$lte:<price>}
+		// 	},
+		// 	{
+		// 		"name":1,
+		// 		"price":1,
+		// 		"accommodates":1
+		// 	}
+		// 	)
+		// .sort(
+		// {
+		//     "price":-1
+		// }
+		// )
 	public List<AccommodationSummary> findListings(String suburb, int persons, int duration, float priceRange) {
-		return null;
+		Criteria criteria = Criteria.where("address.suburb").regex(suburb,"i")
+							.and("accommodates").gte(persons)
+							.and("min_nights").lte(duration)
+							.and("price").lte(priceRange);
+		Query query = Query.query(criteria).with(Sort.by(Direction.DESC, "price"));
+		List<Document> docs = template.find(query,Document.class,COLLECTION);
+		List<AccommodationSummary> accoms = new ArrayList<>();
+		for(Document d:docs){
+			String id = d.getString("_id"); // _id
+			String name = d.getString("name"); // name
+			int accomodates  = d.getInteger("accommodates"); // accommodates
+			float price = d.get("price",Number.class).floatValue(); // price
+			AccommodationSummary accom = new AccommodationSummary();
+			accom.setAccomodates(accomodates);
+			accom.setId(id);
+			accom.setName(name);
+			accom.setPrice(price);
+			accoms.add(accom);
+		}
+
+		return accoms;
 	}
 
 	// IMPORTANT: DO NOT MODIFY THIS METHOD UNLESS REQUESTED TO DO SO
