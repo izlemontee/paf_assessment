@@ -3,6 +3,8 @@ Write your Task 2 answers in this file
 TASK 2.1
 To import to local MongoDB:
 mongoimport -hlocalhost --port=27017 -dbedandbreakfast -clistings_and_reviews data/listings.json
+To import to railway MongoDB:
+mongoimport --uri="mongodb://mongo:<railway password>@<railway host>:<railway port>/bedandbreakfast?authSource=admin&authMechanism=SCRAM-SHA-1" --collection=listings_and_reviws --file=data/listings.json
 
 TASK 2.2
 To find all listings in Australia:
