@@ -25,7 +25,7 @@ use bedandbreakfast;
     );
 
         create table reviews(
-        id int,
+        id int auto_increment,
         date timestamp,
         listing_id varchar(20),
         reviewer_name varchar(64),

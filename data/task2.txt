@@ -1,9 +1,10 @@
 Write your Task 2 answers in this file
 
+TASK 2.1
 To import to local MongoDB:
 mongoimport -hlocalhost --port=27017 -dbedandbreakfast -clistings_and_reviews data/listings.json
 
-
+TASK 2.2
 To find all listings in Australia:
 db.listings_and_reviews.find(
 {"address.country":{$regex:"Australia",$options:"i"}}
@@ -16,6 +17,7 @@ db.listings_and_reviews.find(
    db.listings.insert(doc); // start to replace
 });
 
+TASK 2.3
 to import into reviews collection:
 db.listings.aggregate([
 {
@@ -32,9 +34,8 @@ db.listings.aggregate([
 {
     $addFields:{
     comments: 
-    {
-        $replaceAll:{input:"$comments",find:"\n",replacement:""},
-        $replaceAll:{input:"$comments",find:"\r",replacement:""}
+    {        
+        $replaceAll:{input:"$comments",find:"\n",replacement:""}
         
     },
     reviewer_name:
@@ -43,7 +44,32 @@ db.listings.aggregate([
     }
     
     }
+},
+{
+    $addFields:{
+     comments: 
+    {        
+        $replaceAll:{input:"$comments",find:"\r",replacement:""}
+        
+    },
+    }
 }
 ]).forEach(function(doc){
    db.reviews.insert(doc); // start to replace
 });
+
+TASK 2.4
+Delete "reviews" from listings
+db.listings.update(
+{
+    
+},
+{
+    $unset:{"reviews":""}
+}
+)
+
+TASK 2.5
+Export reviews collection to CSV file 
+mongoexport --collection=reviews --db=bedandbreakfast --type=csv --out=reviews.csv --fields date,listing_id,reviewer_name,comments
+
