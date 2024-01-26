@@ -1,1 +1,49 @@
 Write your Task 2 answers in this file
+
+To import to local MongoDB:
+mongoimport -hlocalhost --port=27017 -dbedandbreakfast -clistings_and_reviews data/listings.json
+
+
+To find all listings in Australia:
+db.listings_and_reviews.find(
+{"address.country":{$regex:"Australia",$options:"i"}}
+)
+
+To import into listings collection:
+db.listings_and_reviews.find(
+{"address.country":{$regex:"Australia",$options:"i"}}
+).forEach(function(doc){
+   db.listings.insert(doc); // start to replace
+});
+
+to import into reviews collection:
+db.listings.aggregate([
+{
+    $unwind:"$reviews"
+},{
+    $project:{
+        "_id":"$reviews._id",
+        "date":"$reviews.date",
+        "listing_id":"$reviews.listing_id",
+        "reviewer_name":"$reviews.reviewer_name",
+        "comments":"$reviews.comments"
+    }
+},
+{
+    $addFields:{
+    comments: 
+    {
+        $replaceAll:{input:"$comments",find:"\n",replacement:""},
+        $replaceAll:{input:"$comments",find:"\r",replacement:""}
+        
+    },
+    reviewer_name:
+    {
+        $replaceAll:{input:"$reviewer_name",find:",",replacement:""}
+    }
+    
+    }
+}
+]).forEach(function(doc){
+   db.reviews.insert(doc); // start to replace
+});
