@@ -48,7 +48,7 @@ public class ListingsRepository {
 		// db.listings.find(
 		// 	{
 		// 		"address.suburb":{$regex:"<suburb>",$options:"i"},
-		// 		accommodates:{$lte:<persons>},
+		// 		accommodates:{$gte:<persons>},
 		// 		"min_nights":{$lte:<duration>},
 		// 		price:{$lte:<price>}
 		// 	},
